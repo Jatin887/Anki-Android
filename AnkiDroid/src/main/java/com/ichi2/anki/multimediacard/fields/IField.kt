@@ -16,33 +16,56 @@
  * You should have received a copy of the GNU General Public License along with         *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
  ****************************************************************************************/
+package com.ichi2.anki.multimediacard.fields
 
-package com.ichi2.anki.multimediacard.glosbe.json;
+import com.ichi2.libanki.Collection
+import com.ichi2.utils.KotlinCleanup
+import java.io.Serializable
 
 /**
- * This is one of the classes, automatically generated to transform json replies from glosbe.com
+ * General interface for a field of any type.
  */
-public class Phrase {
-    private String mLanguage;
-    private String mText;
+interface IField : Serializable {
 
+    val type: EFieldType
 
-    public String getLanguage() {
-        return this.mLanguage;
-    }
+    val isModified: Boolean
 
+    // For image type. Resets type.
+    // Makes no sense to call when type is not image.
+    // the same for other groups below.
+    var imagePath: String?
 
-    public void setLanguage(String l) {
-        this.mLanguage = l;
-    }
+    // For Audio type
+    var audioPath: String?
 
+    // For Text type
+    var text: String?
 
-    public String getText() {
-        return this.mText;
-    }
+    /**
+     * Mark if the current media path is temporary and if it should be deleted once the media has been processed.
+     *
+     * @param hasTemporaryMedia True if the media is temporary, False if it is existing media.
+     * @return
+     */
+    @KotlinCleanup("turn set/hasTemporaryMedia into a property")
+    fun setHasTemporaryMedia(hasTemporaryMedia: Boolean)
 
+    fun hasTemporaryMedia(): Boolean
 
-    public void setText(String text) {
-        this.mText = text;
-    }
+    var name: String?
+
+    /**
+     * Returns the formatted value for this field. Each implementation of IField should return in a format which will be
+     * used to store in the database
+     *
+     * @return
+     */
+    val formattedValue: String?
+
+    /**
+     * @param col Collection - bad abstraction, used to obtain media directory only.
+     * @param value The HTML to send to the field.
+     */
+    fun setFormattedString(col: Collection?, value: String)
 }
