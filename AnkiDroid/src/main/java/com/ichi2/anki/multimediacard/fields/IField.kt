@@ -16,23 +16,56 @@
  * You should have received a copy of the GNU General Public License along with         *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
  ****************************************************************************************/
-
 package com.ichi2.anki.multimediacard.fields
 
-class BasicControllerFactory private constructor() : IControllerFactory {
-    override fun createControllerForField(field: IField): IFieldController? {
-        return when (field.type) {
-            EFieldType.TEXT -> BasicTextFieldController()
-            EFieldType.IMAGE -> BasicImageFieldController()
-            EFieldType.AUDIO_RECORDING -> BasicAudioRecordingFieldController()
-            EFieldType.MEDIA_CLIP -> BasicMediaClipFieldController()
-            else -> null
-        }
-    }
+import com.ichi2.libanki.Collection
+import com.ichi2.utils.KotlinCleanup
+import java.io.Serializable
 
-    companion object {
-        @JvmStatic
-        val instance: IControllerFactory
-            get() = BasicControllerFactory()
-    }
+/**
+ * General interface for a field of any type.
+ */
+interface IField : Serializable {
+
+    val type: EFieldType
+
+    val isModified: Boolean
+
+    // For image type. Resets type.
+    // Makes no sense to call when type is not image.
+    // the same for other groups below.
+    var imagePath: String?
+
+    // For Audio type
+    var audioPath: String?
+
+    // For Text type
+    var text: String?
+
+    /**
+     * Mark if the current media path is temporary and if it should be deleted once the media has been processed.
+     *
+     * @param hasTemporaryMedia True if the media is temporary, False if it is existing media.
+     * @return
+     */
+    @KotlinCleanup("turn set/hasTemporaryMedia into a property")
+    fun setHasTemporaryMedia(hasTemporaryMedia: Boolean)
+
+    fun hasTemporaryMedia(): Boolean
+
+    var name: String?
+
+    /**
+     * Returns the formatted value for this field. Each implementation of IField should return in a format which will be
+     * used to store in the database
+     *
+     * @return
+     */
+    val formattedValue: String?
+
+    /**
+     * @param col Collection - bad abstraction, used to obtain media directory only.
+     * @param value The HTML to send to the field.
+     */
+    fun setFormattedString(col: Collection?, value: String)
 }
